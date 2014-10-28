@@ -10,6 +10,7 @@ private:
 	void lockTexture();
 	void unlockTexture();
 	Uint8 contrastChange(double param, Uint8 color);
+	Uint8 brightnessChange(int param, Uint8 color);
 public:
 	Photo();
 	Photo(SDL_Window *window);
@@ -20,6 +21,8 @@ public:
 	void highContrast(int iterations);
 	void lowContrast();
 	void lowContrast(int iterations);
+	void highBrightness();
+	void lowBrightness();
 	void filterImage();
 };
 

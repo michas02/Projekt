@@ -232,3 +232,52 @@ void Photo::lowContrast(int iterations)
 		this->lowContrast();
 	}
 }
+
+Uint8 Photo::brightnessChange(int param, Uint8 color)
+{
+	if(param+color<0)
+	{
+		return 0;
+	}
+	if(param+color<255)
+	{
+		return param+color;
+	}
+	return 255;
+}
+
+void Photo::lowBrightness()
+{
+	this->lockTexture();
+	Uint32* pixels = (Uint32*)this->pixels;
+	int pixelCount = (this->pitch/4) * this->imageH;
+	for(int i=0;i<pixelCount;++i)
+	{
+		Uint8 red, green, blue;
+		SDL_GetRGB(pixels[i],SDL_GetWindowSurface(window)->format,&red, &green, &blue);
+		red=brightnessChange(-10,red);
+		green=brightnessChange(-10,green);
+		blue=brightnessChange(-10,blue);
+		pixels[i]=SDL_MapRGB(SDL_GetWindowSurface(window)->format, red, green, blue); 
+	}
+	this->unlockTexture();
+	this->setBlendMode(SDL_BLENDMODE_BLEND);
+}
+
+void Photo::highBrightness()
+{
+	this->lockTexture();
+	Uint32* pixels = (Uint32*)this->pixels;
+	int pixelCount = (this->pitch/4) * this->imageH;
+	for(int i=0;i<pixelCount;++i)
+	{
+		Uint8 red, green, blue;
+		SDL_GetRGB(pixels[i],SDL_GetWindowSurface(window)->format,&red, &green, &blue);
+		red=brightnessChange(10,red);
+		green=brightnessChange(10,green);
+		blue=brightnessChange(10,blue);
+		pixels[i]=SDL_MapRGB(SDL_GetWindowSurface(window)->format, red, green, blue); 
+	}
+	this->unlockTexture();
+	this->setBlendMode(SDL_BLENDMODE_BLEND);
+}

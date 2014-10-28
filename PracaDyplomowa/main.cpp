@@ -1,5 +1,4 @@
 #include "Libs.h"
-//#include "Texture.h"
 #include "Photo.h"
 
 SDL_Window *window = NULL;
@@ -150,6 +149,8 @@ void controls(SDL_Event &e)
 			cout<<"Sepia\n";
 			break;
 		case SDLK_n:
+			scratches=false;
+			whiteEffect=false;
 			red=false;
 			green=false;
 			blue=false;
@@ -178,6 +179,12 @@ void controls(SDL_Event &e)
 		case SDLK_f:
 			image->filterImage();
 			break;
+		case SDLK_i:
+			image->highBrightness();
+			break;
+		case SDLK_k:
+			image->lowBrightness();
+			break;
 		case SDLK_1:
 			image->makeBW();
 			image->filterImage();
@@ -185,6 +192,17 @@ void controls(SDL_Event &e)
 			whiteEffect=true;
 			scratches=true;
 			break;
+		case SDLK_2:
+			image->makeSepia(35);
+			image->lowContrast(3);
+			image->filterImage();
+			image->filterImage();
+			image->highBrightness();
+			image->highBrightness();
+			image->highBrightness();
+			image->highBrightness();
+			image->highBrightness();
+			scratches=true;
 		}
 	}
 

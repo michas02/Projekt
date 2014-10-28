@@ -281,3 +281,149 @@ void Photo::highBrightness()
 	this->unlockTexture();
 	this->setBlendMode(SDL_BLENDMODE_BLEND);
 }
+
+HSV Photo::RGBtoHSV(RGB rgb)
+{
+	HSV hsv={0,0,0};
+
+	double x=0,val=0,f=0;
+	int i=0;
+
+	double red=0;
+	double green=0;
+	double blue=0;
+
+	red = (double)rgb.red/255;
+	green = (double)rgb.green/255;
+	blue = (double)rgb.blue/255;
+	
+	x=red;
+	if(x>green)x=green;
+	if(x>blue)x=blue;
+
+	val=red;
+	if(val<green)val=green;
+	if(val<blue)val=blue;
+
+	if(x==val)
+	{
+		hsv.hue=0;
+		hsv.sat=0;
+		if(hsv.val>1)hsv.val=1;
+		if(hsv.val<0)hsv.val=0;
+		hsv.val=val;
+		return hsv;
+	}
+	else if(red==x)
+	{
+		f=green-blue;
+		i=3;
+	}
+	else if(green==x)
+	{
+		f=blue-red;
+		i=5;
+	}
+	else
+	{
+		f=red-green;
+		i=1;
+	}
+	hsv.hue = (int)((i-f/(val-x))*60)%360;
+	hsv.sat = ((val-x)/val);
+	hsv.val = val;
+
+	if(hsv.val>1)hsv.val=1;
+	if(hsv.val<0)hsv.val=-0;
+
+	if(hsv.sat>1)hsv.sat=1;
+	if(hsv.sat<0)hsv.sat=0;
+
+	return hsv;
+}
+
+RGB Photo::HSVtoRGB(HSV hsv)
+{
+	RGB rgb={0,0,0};
+	double red=0,green=0,blue=0;
+	if(hsv.val==0){red=0;green=0;blue=0;}
+	else
+	{
+		hsv.hue/=60;
+		double i=0,f=0,p=0,q=0,t=0;
+		i = floor(hsv.hue);
+		f = hsv.hue-i;
+		p = hsv.val*(1-hsv.sat);
+		q = hsv.val*(1-(hsv.sat*f));
+		t = hsv.val*(1-(hsv.sat*(1-f)));
+		if(i==0){red=hsv.val;green=t;blue=p;}
+		else if(i==1){red=q;green=hsv.val;blue=p;}
+		else if(i==2){red=p;green=hsv.val;blue=t;}
+		else if(i==3){red=p;green=q;blue=hsv.val;}
+		else if(i==4){red=t;green=p;blue=hsv.val;}
+		else if(i==5){red=hsv.val;green=p;blue=q;}
+	}
+	red*=255;
+	green*=255;
+	blue*=255;
+	rgb.red=(int)red;
+	rgb.green=(int)green;
+	rgb.blue=(int)blue;
+	if(rgb.red<0)rgb.red=0;
+	if(rgb.red>255)rgb.red=255;
+
+	if(rgb.green<0)rgb.green=0;
+	if(rgb.green>255)rgb.green=255;
+
+	if(rgb.blue<0)rgb.blue=0;
+	if(rgb.blue>255)rgb.blue=255;
+	return rgb;
+}
+
+void Photo::highSaturation()
+{
+	this->lockTexture();
+	Uint32* pixels = (Uint32*)this->pixels;
+	int pixelCount = (this->pitch/4) * this->imageH;
+	for(int i=0;i<pixelCount;++i)
+	{
+		Uint8 red, green, blue;
+		SDL_GetRGB(pixels[i],SDL_GetWindowSurface(window)->format,&red, &green, &blue);
+		
+		RGB rgb={red,green,blue};
+		HSV hsv= RGBtoHSV(rgb);
+		if(hsv.sat<0.95)
+		{
+			hsv.sat+=0.05;
+		}
+		rgb= HSVtoRGB(hsv);
+
+		pixels[i]=SDL_MapRGB(SDL_GetWindowSurface(window)->format, rgb.red, rgb.green, rgb.blue); 
+	}
+	this->unlockTexture();
+	this->setBlendMode(SDL_BLENDMODE_BLEND);
+}
+
+void Photo::lowSaturation()
+{
+	this->lockTexture();
+	Uint32* pixels = (Uint32*)this->pixels;
+	int pixelCount = (this->pitch/4) * this->imageH;
+	for(int i=0;i<pixelCount;++i)
+	{
+		Uint8 red, green, blue;
+		SDL_GetRGB(pixels[i],SDL_GetWindowSurface(window)->format,&red, &green, &blue);
+		
+		RGB rgb={red,green,blue};
+		HSV hsv= RGBtoHSV(rgb);
+		if(hsv.sat>0.05)
+		{
+			hsv.sat-=0.05;
+		}
+		rgb= HSVtoRGB(hsv);
+
+		pixels[i]=SDL_MapRGB(SDL_GetWindowSurface(window)->format, rgb.red, rgb.green, rgb.blue); 
+	}
+	this->unlockTexture();
+	this->setBlendMode(SDL_BLENDMODE_BLEND);
+}

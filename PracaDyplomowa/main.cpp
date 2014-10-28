@@ -13,6 +13,7 @@ SDL_Texture *texture = NULL;
 Texture *white = NULL;
 Photo *image = NULL;
 Texture *scratch = NULL;
+Texture *shatter = NULL;
 const Uint8 *state;
 
 SDL_Event e;
@@ -20,6 +21,7 @@ SDL_Event e;
 bool red=false,green=false,blue=false,alpha=false;
 bool scratches=false;
 bool whiteEffect=false;
+bool shattered=false;
 int redVal=255,greenVal=255,blueVal=255,alphaVal=255;
 
 bool init()
@@ -99,6 +101,12 @@ bool loadMedia()
 		return false;
 	}
 	white->setBlendMode(SDL_BLENDMODE_BLEND);
+	shatter = new Texture(window);
+	if(!shatter->loadTexture("shattered.jpg",renderer,COLOR_KEY))
+	{
+		return false;
+	}
+	shatter->setBlendMode(SDL_BLENDMODE_BLEND);
 	return true;
 }
 void close()
@@ -164,7 +172,7 @@ void controls(SDL_Event &e)
 			image->loadTexture("bear.jpg",renderer,PIXEL);
 			break;
 			default:break;
-		case SDLK_u:
+		case SDLK_d:
 			red=false;
 			green=false;
 			blue=false;
@@ -185,6 +193,12 @@ void controls(SDL_Event &e)
 		case SDLK_k:
 			image->lowBrightness();
 			break;
+		case SDLK_u:
+			image->highSaturation();
+			break;
+		case SDLK_j:
+			image->lowSaturation();
+			break;
 		case SDLK_1:
 			image->makeBW();
 			image->filterImage();
@@ -193,16 +207,23 @@ void controls(SDL_Event &e)
 			scratches=true;
 			break;
 		case SDLK_2:
-			image->makeSepia(35);
-			image->lowContrast(3);
+			image->makeSepia(40);
+			image->lowContrast(2);
 			image->filterImage();
 			image->filterImage();
-			image->highBrightness();
-			image->highBrightness();
-			image->highBrightness();
-			image->highBrightness();
-			image->highBrightness();
+
 			scratches=true;
+		case SDLK_3:
+			image->filterImage();
+			image->lowSaturation();
+			image->lowSaturation();
+			image->lowSaturation();
+			image->lowSaturation();
+			image->lowContrast();
+			image->highBrightness();
+			image->highBrightness();
+			image->highBrightness();
+			image->highBrightness();
 		}
 	}
 
@@ -272,6 +293,12 @@ int main( int argc, char* args[] )
 					white->setAlpha(120);
 					white->renderStreched(renderer);
 				}
+				/*shattered=true;
+				if(shatter)
+				{
+					shatter->setAlpha(120);
+					shatter->renderStreched(renderer);
+				}*/
 				SDL_RenderPresent(renderer);
 				SDL_RenderClear(renderer);
 			}

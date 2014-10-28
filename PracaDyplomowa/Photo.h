@@ -11,6 +11,9 @@ private:
 	void unlockTexture();
 	Uint8 contrastChange(double param, Uint8 color);
 	Uint8 brightnessChange(int param, Uint8 color);
+
+	HSV RGBtoHSV(RGB rgb);
+	RGB HSVtoRGB(HSV hsv);
 public:
 	Photo();
 	Photo(SDL_Window *window);
@@ -23,6 +26,8 @@ public:
 	void lowContrast(int iterations);
 	void highBrightness();
 	void lowBrightness();
+	void highSaturation();
+	void lowSaturation();
 	void filterImage();
 };
 

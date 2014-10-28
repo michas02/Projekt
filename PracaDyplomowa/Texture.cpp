@@ -37,7 +37,7 @@ void Texture::free()
 
 bool Texture::loadTexture(string file, SDL_Renderer *renderer,int mode)
 {
-	free();
+	//free();
 	//SDL_Texture* loadTexture(string path);
 	SDL_Texture *newTexture = NULL;
 	SDL_Surface *loadedSurface = IMG_Load(file.c_str());

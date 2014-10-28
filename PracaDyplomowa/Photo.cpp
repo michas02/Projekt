@@ -216,3 +216,19 @@ void Photo::unlockTexture()
 {
 	SDL_UnlockTexture(texture);
 }
+
+void Photo::highContrast(int iterations)
+{
+	for(int i=0;i<iterations;i++)
+	{
+		this->highContrast();
+	}
+}
+
+void Photo::lowContrast(int iterations)
+{
+	for(int i=0;i<iterations;i++)
+	{
+		this->lowContrast();
+	}
+}

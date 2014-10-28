@@ -35,7 +35,7 @@ void Texture::free()
 	imageH=0;
 }
 
-bool Texture::loadTexture(string file, SDL_Renderer *renderer)
+bool Texture::loadTexture(string file, SDL_Renderer *renderer,int mode)
 {
 	free();
 	//SDL_Texture* loadTexture(string path);
@@ -49,54 +49,43 @@ bool Texture::loadTexture(string file, SDL_Renderer *renderer)
 	}
 	else
 	{
-		//SDL_SetColorKey(loadedSurface,SDL_TRUE,SDL_MapRGB(loadedSurface->format,0xFF,0,0xFF));
-		//newTexture = SDL_CreateTextureFromSurface(renderer,loadedSurface);
-		SDL_Surface* formattedSurface = SDL_ConvertSurface( loadedSurface, SDL_GetWindowSurface( window )->format, NULL );
-		newTexture = SDL_CreateTexture( renderer, SDL_GetWindowPixelFormat( window ), SDL_TEXTUREACCESS_STREAMING, formattedSurface->w, formattedSurface->h );
-		if(newTexture==NULL)
+		
+		if(mode==COLOR_KEY)
 		{
-			cout<<"Failed to convert surface: "<<SDL_GetError()<<endl;
-			return false;
-		}
-		else
-		{
-			SDL_LockTexture( newTexture, NULL, &pixels, &pitch );
-			memcpy( pixels, formattedSurface->pixels, formattedSurface->pitch * formattedSurface->h );
-			SDL_UnlockTexture( newTexture );
-
-			pixels = NULL;
-            imageW = formattedSurface->w;
-            imageH = formattedSurface->h;
+			SDL_SetColorKey(loadedSurface,SDL_TRUE,SDL_MapRGB(loadedSurface->format,0xFF,0,0xFF));
+			newTexture = SDL_CreateTextureFromSurface(renderer,loadedSurface);
+			imageW = loadedSurface->w;
+			imageH = loadedSurface->h;
 			texture=newTexture;
 		}
-		SDL_FreeSurface(loadedSurface);
-		SDL_FreeSurface(formattedSurface);
+		if(mode==PIXEL)
+		{
+			SDL_Surface* formattedSurface = SDL_ConvertSurface( loadedSurface, SDL_GetWindowSurface( window )->format, NULL );
+			newTexture = SDL_CreateTexture( renderer, SDL_GetWindowPixelFormat( window ), SDL_TEXTUREACCESS_STREAMING, formattedSurface->w, formattedSurface->h );
+			if(newTexture==NULL)
+			{
+				cout<<"Failed to convert surface: "<<SDL_GetError()<<endl;
+				return false;
+			}
+			else
+			{
+				SDL_LockTexture( newTexture, NULL, &pixels, &pitch );
+				memcpy( pixels, formattedSurface->pixels, formattedSurface->pitch * formattedSurface->h );
+				SDL_UnlockTexture( newTexture );
+
+				pixels = NULL;
+				imageW = formattedSurface->w;
+				imageH = formattedSurface->h;
+				texture=newTexture;
+			}
+			SDL_FreeSurface(loadedSurface);
+			SDL_FreeSurface(formattedSurface);
+		}
 	}
 	//this->colorKey(window);
 	return true;
 }
 
-bool Texture::loadTexture(string file, SDL_Renderer *renderer,int frameW)
-{
-	if(!loadTexture(file,renderer))
-	{
-		return false;
-	}
-	this->frameW=frameW;
-
-	frameNumber=imageW/frameW;
-	imageClip = new SDL_Rect[frameNumber];
-
-	for(int i=0;i<frameNumber;i++)
-	{
-		imageClip[i].x=frameW*i;
-		imageClip[i].y=0;
-		imageClip[i].w=frameW;
-		imageClip[i].h=imageH;
-	}
-
-	return true;
-}
 
 void Texture::render(int x,int y,SDL_Renderer *renderer)
 {
@@ -127,23 +116,14 @@ void Texture::render(int x,int y,SDL_Renderer *renderer, double angle)
 
 void Texture::renderStreched(SDL_Renderer *renderer)
 {
-	if(frameNumber==0)
-	{
-		SDL_Rect renderQuad = {0,0,imageW,imageH};
-		//SDL_RenderCopyEx(renderer,texture,NULL,&renderQuad,angle,NULL,SDL_FLIP_NONE);
-	}
-	else
-	{
-		if(frameCounter==frameNumber){frameCounter=0;}
-		SDL_Rect renderQuad = {0,0,800,600};
-		SDL_Rect renderQuadClip = imageClip[frameCounter];
-		//SDL_RenderCopyEx(renderer,texture,&renderQuadClip,&renderQuad,angle,NULL,SDL_FLIP_NONE);
-		SDL_RenderCopy(renderer,texture,&renderQuadClip,&renderQuad);
-		frameCounter2++;
-		if(frameCounter2==6){
-			frameCounter2=0;
-			frameCounter++;}
-	}
+	SDL_Rect clip;
+	
+	clip.x=0;
+	clip.y=0;
+	clip.w=this->imageW;
+	clip.h=this->imageH;
+
+	this->render(0,0,renderer,clip);
 }
 
 int Texture::getHeight()

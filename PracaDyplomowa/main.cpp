@@ -19,6 +19,8 @@ const Uint8 *state;
 SDL_Event e;
 
 bool red=false,green=false,blue=false,alpha=false;
+bool scratches=false;
+bool whiteEffect=false;
 int redVal=255,greenVal=255,blueVal=255,alphaVal=255;
 
 bool init()
@@ -81,19 +83,19 @@ bool init()
 bool loadMedia()
 {
 	image = new Photo(window);
-	if(!image->loadTexture("bear.jpg",renderer))
+	if(!image->loadTexture("bear.jpg",renderer,PIXEL))
 	{
 		return false;
 	}
 	image->setBlendMode(SDL_BLENDMODE_BLEND);
 	scratch = new Texture(window);
-	if(!scratch->loadTexture("scratch.jpg",renderer))
+	if(!scratch->loadTexture("scratch2.jpg",renderer,COLOR_KEY))
 	{
 		return false;
 	}
 	scratch->setBlendMode(SDL_BLENDMODE_BLEND);
 	white = new Texture(window);
-	if(!white->loadTexture("white.bmp",renderer))
+	if(!white->loadTexture("whiteBorder.jpg",renderer,COLOR_KEY))
 	{
 		return false;
 	}
@@ -158,9 +160,7 @@ void controls(SDL_Event &e)
 			alphaVal=255;
 			cout<<"Reset\n";
 			image->free();
-			image->loadTexture("bear.jpg",renderer);
-			//image->modifyColor(redVal,greenVal,blueVal);
-			//image->setAlpha(alphaVal);
+			image->loadTexture("bear.jpg",renderer,PIXEL);
 			break;
 			default:break;
 		case SDLK_u:
@@ -177,6 +177,13 @@ void controls(SDL_Event &e)
 			break;
 		case SDLK_f:
 			image->filterImage();
+			break;
+		case SDLK_1:
+			image->makeBW();
+			image->filterImage();
+			image->lowContrast(10);
+			whiteEffect=true;
+			scratches=true;
 			break;
 		}
 	}
@@ -237,10 +244,16 @@ int main( int argc, char* args[] )
 				clip2.w=1024;
 				clip2.h=1024;
 				image->render(0,0,renderer,clip);
-				//scratch->setAlpha(50);
-				//scratch->render(0,0,renderer);
-				//white->setAlpha(255);
-				//white->render(0,0,renderer);
+				if(scratches)
+				{
+					scratch->setAlpha(50);
+					scratch->render(0,0,renderer,clip2);
+				}
+				if(whiteEffect)
+				{
+					white->setAlpha(120);
+					white->renderStreched(renderer);
+				}
 				SDL_RenderPresent(renderer);
 				SDL_RenderClear(renderer);
 			}

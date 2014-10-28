@@ -34,8 +34,7 @@ public:
 	Texture(SDL_Window *window);
 	Texture();
 	~Texture();
-	bool loadTexture(string file, SDL_Renderer *renderer);
-	bool loadTexture(string file, SDL_Renderer *renderer, int frameW);
+	bool loadTexture(string file, SDL_Renderer *renderer, int mode);
 
 	int getWidth();
 	int getHeight();

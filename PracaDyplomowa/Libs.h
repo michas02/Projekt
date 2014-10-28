@@ -17,4 +17,6 @@ using namespace std;
 
 enum TEXTURE_ENUM {RED,GREEN,BLUE};
 
+enum PHOTO_ENUM {PIXEL,COLOR_KEY};
+
 #endif

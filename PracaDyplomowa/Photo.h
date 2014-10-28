@@ -17,7 +17,9 @@ public:
 	void makeBW();
 	void makeSepia(int colorSaturation);
 	void highContrast();
+	void highContrast(int iterations);
 	void lowContrast();
+	void lowContrast(int iterations);
 	void filterImage();
 };
 

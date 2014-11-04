@@ -43,6 +43,7 @@ public:
 	void render(int x, int y, SDL_Renderer *renderer);
 	void render(int x, int y, SDL_Renderer *renderer, double angle);
 	void renderStreched(SDL_Renderer *renderer);
+	void renderPanel(SDL_Renderer *renderer);
 	void render(int x, int y, SDL_Renderer *renderer,SDL_Rect &clip);
 
 	void free();

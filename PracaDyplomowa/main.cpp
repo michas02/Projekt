@@ -3,20 +3,20 @@
 #include "Button.h"
 
 SDL_Window *window = NULL;
-const int screenWidth = 800;
-const int screenHeight = 600;
+
 
 SDL_Renderer *renderer = NULL;
 SDL_Surface *screenSurface = NULL;
 SDL_Texture *texture = NULL;
-
+SDL_Texture *panelTexture = NULL;
 Button **buttons = NULL;
-const int buttonLimit = 4;
+const int buttonLimit = 6;
 
 Texture *white = NULL;
 Photo *image = NULL;
 Texture *scratch = NULL;
 Texture *shatter = NULL;
+Texture *photoPanel = NULL;
 const Uint8 *state;
 
 SDL_Event e;
@@ -86,6 +86,7 @@ bool init()
 			}
 		}
 	}
+	SDL_SetWindowFullscreen(window,SDL_WINDOW_FULLSCREEN);
 	state = SDL_GetKeyboardState(NULL);
 	return true;
 }
@@ -98,6 +99,11 @@ bool loadMedia()
 		return false;
 	}
 	image->setBlendMode(SDL_BLENDMODE_BLEND);
+	photoPanel = new Texture(window);
+	if(!photoPanel->loadTexture("wood.jpg",renderer,COLOR_KEY))
+	{
+		return false;
+	}
 	scratch = new Texture(window);
 	if(!scratch->loadTexture("scratch2.jpg",renderer,COLOR_KEY))
 	{
@@ -128,30 +134,39 @@ bool loadMedia()
 	{
 		buttons[i]=new Button();
 	}
-	if(!buttons[0]->init(40,40,120,40,"button.jpg","Preset 1",renderer,font))
+	if(!buttons[0]->init(40,20,120,40,"button.jpg","Preset 1",renderer,font))
 	{
 		return false;
 	}
 
-	if(!buttons[1]->init(200,40,120,40,"button.jpg","Preset 2",renderer,font))
+	if(!buttons[1]->init(40,80,120,40,"button.jpg","Preset 2",renderer,font))
 	{
 		return false;
 	}
 
-	if(!buttons[2]->init(360,40,120,40,"button.jpg","Preset 3",renderer,font))
+	if(!buttons[2]->init(40,140,120,40,"button.jpg","Preset 3",renderer,font))
 	{
 		return false;
 	}
-	if(!buttons[3]->init(520,40,120,40,"button.jpg","Reset",renderer,font))
+	if(!buttons[3]->init(40,200,120,40,"button.jpg","Reset",renderer,font))
 	{
 		return false;
-		}
+	}
+	if(!buttons[4]->init(40,260,120,40,"button.jpg","Koniec",renderer,font))
+	{
+		return false;
+	}
+	if(!buttons[5]->init(screenWidth-40-photoPanelWidth,0,40,40,"button.jpg","X",renderer,font))
+	{
+		return false;
+	}
 	return true;
 }
 void close()
 {
 	delete buttons;
 	image->free();
+	photoPanel->free();
 	scratch->free();
 	white->free();
 	SDL_DestroyTexture(texture);
@@ -318,6 +333,7 @@ int main( int argc, char* args[] )
 					}
 				}
 				image->renderStreched(renderer);
+				photoPanel->renderPanel(renderer);
 				if(scratches)
 				{
 					scratch->setAlpha(50);
@@ -338,6 +354,7 @@ int main( int argc, char* args[] )
 				{
 					buttons[i]->render(renderer);
 				}
+				
 				SDL_RenderPresent(renderer);
 				SDL_RenderClear(renderer);
 
@@ -345,7 +362,8 @@ int main( int argc, char* args[] )
 				{
 					if((buttons[i]->getClicked())&&(!buttons[i]->getSelected()))
 					{
-						if(buttons[i]->getText()=="Preset 1")
+						string button=buttons[i]->getText();
+						if(button=="Preset 1")
 						{
 							image->makeBW();
 							image->filterImage();
@@ -354,7 +372,7 @@ int main( int argc, char* args[] )
 							scratches=true;
 						}
 
-						if(buttons[i]->getText()=="Preset 2")
+						if(button=="Preset 2")
 						{
 							image->makeSepia(40);
 							image->lowContrast(2);
@@ -362,7 +380,7 @@ int main( int argc, char* args[] )
 							image->filterImage();
 							scratches=true;
 						}
-						if(buttons[i]->getText()=="Preset 3")
+						if(button=="Preset 3")
 						{
 							image->filterImage();
 							image->lowSaturation();
@@ -375,7 +393,7 @@ int main( int argc, char* args[] )
 							image->highBrightness();
 							image->highBrightness();
 						}
-						if(buttons[i]->getText()=="Reset")
+						if(button=="Reset")
 						{
 							scratches=false;
 							whiteEffect=false;
@@ -390,6 +408,14 @@ int main( int argc, char* args[] )
 							cout<<"Reset\n";
 							image->free();
 							image->loadTexture("bear.jpg",renderer,PIXEL);
+						}
+						if(button=="Koniec")
+						{
+							quit=true;
+						}
+						if(button=="X")
+						{
+							quit=true;
 						}
 						buttons[i]->setClicked();
 					}

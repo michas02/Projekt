@@ -141,7 +141,7 @@ void Texture::renderStreched(SDL_Renderer *renderer)
 	clip.y=0;
 	clip.w=this->imageW;
 	clip.h=this->imageH;
-	SDL_Rect displayRect = {0,0,800,600};
+	SDL_Rect displayRect = {0,0,photoPanelWidth,screenHeight};
 	SDL_RenderCopy(renderer,texture,&clip,&displayRect);
 }
 
@@ -183,7 +183,7 @@ void Texture::modifyColor(int red,int green, int blue)
 
 void Texture::render(int x, int y, SDL_Renderer *renderer,SDL_Rect &clip)
 {
-	SDL_Rect displayRect = {0,0,800,600};
+	SDL_Rect displayRect = {0,0,photoPanelWidth,screenHeight};
 	SDL_RenderCopyEx(renderer,texture,&displayRect,&clip,NULL,NULL,SDL_FLIP_NONE);
 }
 
@@ -262,4 +262,15 @@ void Texture::decreaseAlpha()
 {
 	if(alpha>0){alpha--;}
 	this->setAlpha(alpha);
+}
+
+void Texture::renderPanel(SDL_Renderer *renderer)
+{
+	SDL_Rect clip;
+	clip.x=0;
+	clip.y=0;
+	clip.w=this->imageW;
+	clip.h=this->imageH;
+	SDL_Rect displayRect = {photoPanelWidth,0,screenWidth,screenHeight};
+	SDL_RenderCopy(renderer,texture,&clip,&displayRect);
 }

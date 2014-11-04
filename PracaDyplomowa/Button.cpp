@@ -10,7 +10,7 @@ bool Button::init(int x,int y,int width,int height ,string image,string text,SDL
 	this->selected=false;
 	this->clicked=false;
 	this->text=text;
-	this->x=x;
+	this->x=photoPanelWidth+x;
 	this->y=y;
 	this->width=width;
 	this->height=height;

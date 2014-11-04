@@ -34,4 +34,10 @@ struct HSV
 	double val;
 };
 
+const int screenWidth = 1366;
+const int screenHeight = 768;
+
+const int photoPanelWidth = screenWidth*4/5;
+const int photoPanelHeight = screenHeight*4/5;
+
 #endif

@@ -35,6 +35,7 @@ public:
 	Texture();
 	~Texture();
 	bool loadTexture(string file, SDL_Renderer *renderer, int mode);
+	bool loadTextTexture(TTF_Font *font,string text, SDL_Renderer *renderer);
 
 	int getWidth();
 	int getHeight();

@@ -37,7 +37,7 @@ void Texture::free()
 
 bool Texture::loadTexture(string file, SDL_Renderer *renderer,int mode)
 {
-	//free();
+	free();
 	//SDL_Texture* loadTexture(string path);
 	SDL_Texture *newTexture = NULL;
 	SDL_Surface *loadedSurface = IMG_Load(file.c_str());
@@ -86,6 +86,26 @@ bool Texture::loadTexture(string file, SDL_Renderer *renderer,int mode)
 	return true;
 }
 
+bool Texture::loadTextTexture(TTF_Font *font,string text, SDL_Renderer *renderer)
+{
+	free();
+	SDL_Color textColor = {0,0,0};
+	SDL_Surface* textSurface = TTF_RenderText_Solid(font,text.c_str(),textColor);
+	if(textSurface==NULL)
+	{
+		cout<<"Failed to create text texture: "<<SDL_GetError()<<endl;
+		return false;
+	}
+	else
+	{
+		texture=SDL_CreateTextureFromSurface(renderer,textSurface);
+		imageW=textSurface->w;
+		imageH=textSurface->h;
+	}
+	SDL_FreeSurface(textSurface);
+	return true;
+}
+
 
 void Texture::render(int x,int y,SDL_Renderer *renderer)
 {
@@ -117,13 +137,12 @@ void Texture::render(int x,int y,SDL_Renderer *renderer, double angle)
 void Texture::renderStreched(SDL_Renderer *renderer)
 {
 	SDL_Rect clip;
-	
 	clip.x=0;
 	clip.y=0;
 	clip.w=this->imageW;
 	clip.h=this->imageH;
-
-	this->render(0,0,renderer,clip);
+	SDL_Rect displayRect = {0,0,800,600};
+	SDL_RenderCopy(renderer,texture,&clip,&displayRect);
 }
 
 int Texture::getHeight()
@@ -165,7 +184,7 @@ void Texture::modifyColor(int red,int green, int blue)
 void Texture::render(int x, int y, SDL_Renderer *renderer,SDL_Rect &clip)
 {
 	SDL_Rect displayRect = {0,0,800,600};
-	SDL_RenderCopyEx(renderer,texture,&clip,&displayRect,NULL,NULL,SDL_FLIP_NONE);
+	SDL_RenderCopyEx(renderer,texture,&displayRect,&clip,NULL,NULL,SDL_FLIP_NONE);
 }
 
 

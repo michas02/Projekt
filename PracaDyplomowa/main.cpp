@@ -1,5 +1,6 @@
 #include "Libs.h"
 #include "Photo.h"
+#include "Button.h"
 
 SDL_Window *window = NULL;
 const int screenWidth = 800;
@@ -9,6 +10,8 @@ SDL_Renderer *renderer = NULL;
 SDL_Surface *screenSurface = NULL;
 SDL_Texture *texture = NULL;
 
+Button **buttons = NULL;
+const int buttonLimit = 4;
 
 Texture *white = NULL;
 Photo *image = NULL;
@@ -26,6 +29,12 @@ int redVal=255,greenVal=255,blueVal=255,alphaVal=255;
 
 bool init()
 {
+	if(TTF_Init()<0)
+	{
+		cout<<"Failed to initialize TTF: "<<SDL_GetError()<<endl;
+		system("PAUSE");
+		return false;
+	}
 	if(SDL_Init(SDL_INIT_VIDEO)<0)
 	{
 		cout<<"Failed to initialize video: "<<SDL_GetError()<<endl;
@@ -107,10 +116,41 @@ bool loadMedia()
 		return false;
 	}
 	shatter->setBlendMode(SDL_BLENDMODE_BLEND);
+
+	TTF_Font *font=TTF_OpenFont("CREAMPUF.ttf",32);
+	if(font==NULL)
+	{
+		cout<<"Couldn't open font from file: "<<SDL_GetError()<<endl;
+		return false;
+	}
+	buttons = new Button*[buttonLimit];
+	for(int i=0;i<buttonLimit;i++)
+	{
+		buttons[i]=new Button();
+	}
+	if(!buttons[0]->init(40,40,120,40,"button.jpg","Preset 1",renderer,font))
+	{
+		return false;
+	}
+
+	if(!buttons[1]->init(200,40,120,40,"button.jpg","Preset 2",renderer,font))
+	{
+		return false;
+	}
+
+	if(!buttons[2]->init(360,40,120,40,"button.jpg","Preset 3",renderer,font))
+	{
+		return false;
+	}
+	if(!buttons[3]->init(520,40,120,40,"button.jpg","Reset",renderer,font))
+	{
+		return false;
+		}
 	return true;
 }
 void close()
 {
+	delete buttons;
 	image->free();
 	scratch->free();
 	white->free();
@@ -271,22 +311,17 @@ int main( int argc, char* args[] )
 						}
 					}
 					controls(e);
+
+					for(int i=0;i<buttonLimit;i++)
+					{
+						buttons[i]->collision(e,state);
+					}
 				}
-				SDL_Rect clip;
-				clip.x=0;
-				clip.y=0;
-				clip.w=991;
-				clip.h=678;
-				SDL_Rect clip2;
-				clip2.x=0;
-				clip2.y=0;
-				clip2.w=1024;
-				clip2.h=1024;
-				image->render(0,0,renderer,clip);
+				image->renderStreched(renderer);
 				if(scratches)
 				{
 					scratch->setAlpha(50);
-					scratch->render(0,0,renderer,clip2);
+					scratch->renderStreched(renderer);
 				}
 				if(whiteEffect)
 				{
@@ -299,8 +334,66 @@ int main( int argc, char* args[] )
 					shatter->setAlpha(120);
 					shatter->renderStreched(renderer);
 				}*/
+				for(int i=0;i<buttonLimit;i++)
+				{
+					buttons[i]->render(renderer);
+				}
 				SDL_RenderPresent(renderer);
 				SDL_RenderClear(renderer);
+
+				for(int i=0;i<buttonLimit;i++)
+				{
+					if((buttons[i]->getClicked())&&(!buttons[i]->getSelected()))
+					{
+						if(buttons[i]->getText()=="Preset 1")
+						{
+							image->makeBW();
+							image->filterImage();
+							image->lowContrast(10);
+							whiteEffect=true;
+							scratches=true;
+						}
+
+						if(buttons[i]->getText()=="Preset 2")
+						{
+							image->makeSepia(40);
+							image->lowContrast(2);
+							image->filterImage();
+							image->filterImage();
+							scratches=true;
+						}
+						if(buttons[i]->getText()=="Preset 3")
+						{
+							image->filterImage();
+							image->lowSaturation();
+							image->lowSaturation();
+							image->lowSaturation();
+							image->lowSaturation();
+							image->lowContrast();
+							image->highBrightness();
+							image->highBrightness();
+							image->highBrightness();
+							image->highBrightness();
+						}
+						if(buttons[i]->getText()=="Reset")
+						{
+							scratches=false;
+							whiteEffect=false;
+							red=false;
+							green=false;
+							blue=false;
+							alpha=false;
+							redVal=255;
+							greenVal=255;
+							blueVal=255;
+							alphaVal=255;
+							cout<<"Reset\n";
+							image->free();
+							image->loadTexture("bear.jpg",renderer,PIXEL);
+						}
+						buttons[i]->setClicked();
+					}
+				}
 			}
 		}
 	}

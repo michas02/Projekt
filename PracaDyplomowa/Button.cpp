@@ -5,8 +5,11 @@ Button::Button()
 	
 }
 
-bool Button::init(int x,int y,int width,int height ,string image,string text,SDL_Renderer *renderer, TTF_Font *font)
+bool Button::init(int x,int y,int width,int height ,string image,string text,string function,SDL_Renderer *renderer, TTF_Font *font, bool visible,int tab)
 {
+	this->tab=tab;
+	this->function=function;
+	this->visible=visible;
 	this->selected=false;
 	this->clicked=false;
 	this->text=text;
@@ -137,4 +140,31 @@ void Button::collision(SDL_Event &e, const Uint8 *state)
 string Button::getText()
 {
 	return text;
+}
+
+bool Button::isVisible()
+{
+	return visible;
+}
+
+void Button::setVisible(bool visible)
+{
+	this->visible=visible;
+}
+
+string Button::getFunction()
+{
+	return function;
+}
+
+void Button::tabChange(int tab)
+{
+	if(this->tab==tab)
+	{
+		visible=true;
+	}
+	else
+	{
+		visible=false;
+	}
 }

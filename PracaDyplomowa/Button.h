@@ -13,9 +13,11 @@ private:
 	int defWidth,defHeight;
 	int width,height;
 	string text;
+	string function;
+	int tab;
 	bool clicked;
 	bool selected;
-
+	bool visible;
 	bool initTextTexture(TTF_Font *font,SDL_Renderer *renderer);
 public:
 	Button();
@@ -25,7 +27,11 @@ public:
 	bool getClicked();
 	void setClicked();
 	bool getSelected();
+	bool isVisible();
+	void setVisible(bool visible);
 	string getText();
-	bool init(int x,int y,int width,int height ,string image,string text,SDL_Renderer *renderer, TTF_Font *font);
+	string getFunction();
+	void tabChange(int tab);
+	bool init(int x,int y,int width,int height ,string image,string text,string function,SDL_Renderer *renderer, TTF_Font *font, bool visible, int tab);
 };
 #endif

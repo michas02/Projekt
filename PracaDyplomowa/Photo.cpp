@@ -3,6 +3,10 @@
 
 Photo::Photo(SDL_Window *window)
 {
+	this->brightnessCounter=0;
+	this->contrastCounter=0;
+	this->filterCounter=0;
+	this->saturationCounter=0;
 	this->window=window;
 }
 
@@ -15,7 +19,8 @@ void Photo::makeBW()
 	{
 		Uint8 red, green, blue;
 		SDL_GetRGB(pixels[i],SDL_GetWindowSurface(window)->format,&red, &green, &blue);
-		Uint8 color=(red+green+blue)/3;
+		//Uint8 color=(red+green+blue)/3;
+		Uint8 color=red*0.299+green*0.587+blue*0.114;
 		pixels[i]=SDL_MapRGB(SDL_GetWindowSurface(window)->format, color, color, color); 
 	}
 
@@ -104,11 +109,42 @@ Uint8 Photo::contrastChange(double param, Uint8 color)
 	return 255;
 }
 
-void Photo::filterImage()
+void Photo::filterImage(int filter)
 {
-	int valArray[3][3]={{1,1,1},{1,4,1},{1,1,1}};
+	int valArray[3][3]={{0,0,0},{0,0,0},{0,0,0}};
+	
+	if(filter==LOW)
+	{
+		valArray[0][0]=1;
+		valArray[0][1]=1;
+		valArray[0][2]=1;
+
+		valArray[1][0]=1;
+		valArray[1][1]=4;
+		valArray[1][2]=1;
+
+		valArray[2][0]=1;
+		valArray[2][1]=1;
+		valArray[2][2]=1;
+	}
+
+		if(filter==HIGH)
+	{
+		valArray[0][0]=-1;
+		valArray[0][1]=-1;
+		valArray[0][2]=-1;
+
+		valArray[1][0]=-1;
+		valArray[1][1]=20;
+		valArray[1][2]=-1;
+
+		valArray[2][0]=-1;
+		valArray[2][1]=-1;
+		valArray[2][2]=-1;
+	}
+	//int 
 	//int valArray[3][3]={{0,-1,0},{0,2,0},{0,-1,0}};
-	//int valArray[3][3]={{-1,-1,-1},{-1,9,-1},{-1,-1,-1}};
+	//int valArray[3][3]={{-1,-1,-1},{-1,20,-1},{-1,-1,-1}};
 	//int valArray[3][3]={{1,0,-1},{1,1,-1},{1,0,-1}};
 	//int valArray[3][3]={{-1,-1,-1},{1,-2,1},{1,1,1}};
 	Uint32 color = SDL_MapRGBA( SDL_GetWindowSurface(window)->format,0xFF,0xFF,0xFF,0);
@@ -184,13 +220,14 @@ void Photo::filterImage()
 				sr/=arraySum;
 				sg/=arraySum;
 				sb/=arraySum;
-				if(sr<0)sr=0;
-				if(sg<0)sr=0;
-				if(sb<0)sr=0;
-				if(sr>255)sr=255;
-				if(sg>255)sr=255;
-				if(sb>255)sb=255;
+
 			}
+				if(sr<0)sr=0;
+				if(sg<0)sg=0;
+				if(sb<0)sb=0;
+				if(sr>255)sr=255;
+				if(sg>255)sg=255;
+				if(sb>255)sb=255;
 			//pixels[x+y*this->pitch/4]=SDL_MapRGB(SDL_GetWindowSurface(window)->format, sr, sg, sb); 
 			newPixels[x+y*this->pitch/4]=SDL_MapRGB(SDL_GetWindowSurface(window)->format, sr, sg, sb);
 		}
@@ -426,4 +463,132 @@ void Photo::lowSaturation()
 	}
 	this->unlockTexture();
 	this->setBlendMode(SDL_BLENDMODE_BLEND);
+}
+
+void Photo::setBrightnessCounter(int brightnessCounter)
+{
+	this->brightnessCounter=brightnessCounter;
+}
+
+void Photo::setContrastCounter(int contrastCounter)
+{
+	this->contrastCounter=contrastCounter;
+}
+
+void Photo::setFilterCounter(int filterCounter)
+{
+	this->filterCounter=filterCounter;
+}
+
+void Photo::setSaturationCounter(int saturationCounter)
+{
+	this->saturationCounter=saturationCounter;
+}
+
+void Photo::incCounter(int counter)
+{
+	if(counter==FILTER)
+	{
+		filterCounter++;
+	}
+	else if(counter==CONTRAST)
+	{
+		contrastCounter++;
+	}
+	else if(counter==SATURATION)
+	{
+		saturationCounter++;
+	}
+	else if(counter==BRIGHTNESS)
+	{
+		brightnessCounter++;
+	}
+}
+
+
+void Photo::decCounter(int counter)
+{
+	if(counter==FILTER)
+	{
+		filterCounter--;
+	}
+	else if(counter==CONTRAST)
+	{
+		contrastCounter--;
+	}
+	else if(counter==SATURATION)
+	{
+		saturationCounter--;
+	}
+	else if(counter==BRIGHTNESS)
+	{
+		brightnessCounter--;
+	}
+}
+
+void Photo::restoreEffects()
+{
+	if(brightnessCounter>0)
+	{
+		for(int i=0;i<brightnessCounter;i++)
+		{
+			this->highBrightness();
+		}
+	}
+	else
+	{
+		for(int i=brightnessCounter;i>0;i++)
+		{
+			this->lowContrast();
+		}
+	}
+
+
+
+	if(saturationCounter>0)
+	{
+		for(int i=0;i<saturationCounter;i++)
+		{
+			this->highSaturation();
+		}
+	}
+	else
+	{
+		for(int i=saturationCounter;i>0;i++)
+		{
+			this->lowSaturation();
+		}
+	}
+
+	
+	if(filterCounter>0)
+	{
+		for(int i=0;i<filterCounter;i++)
+		{
+			this->filterImage(HIGH);
+		}
+	}
+	else
+	{
+		for(int i=filterCounter;i>0;i++)
+		{
+			this->filterImage(LOW);
+		}
+	}
+
+	
+	if(contrastCounter>0)
+	{
+		for(int i=0;i<contrastCounter;i++)
+		{
+			this->highContrast();
+		}
+	}
+	else
+	{
+		for(int i=contrastCounter;i>0;i++)
+		{
+			this->lowContrast();
+		}
+	}
 }

@@ -7,6 +7,11 @@
 class Photo : public Texture
 {
 private:
+	int saturationCounter;
+	int brightnessCounter;
+	int filterCounter;
+	int contrastCounter;
+
 	void lockTexture();
 	void unlockTexture();
 	Uint8 contrastChange(double param, Uint8 color);
@@ -28,7 +33,16 @@ public:
 	void lowBrightness();
 	void highSaturation();
 	void lowSaturation();
-	void filterImage();
+	void filterImage(int filter);
+
+	void setSaturationCounter(int saturationCounter);
+	void setContrastCounter(int contrastCounter);
+	void setFilterCounter(int filterCounter);
+	void setBrightnessCounter(int brightnessCounter);
+
+	void incCounter(int counter);
+	void decCounter(int counter);
+	void restoreEffects();
 };
 
 #endif

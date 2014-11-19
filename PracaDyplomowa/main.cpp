@@ -12,22 +12,18 @@ SDL_Texture *panelTexture = NULL;
 Button **buttons = NULL;
 const int buttonLimit = 26;
 
-Texture *white = NULL;
 Photo *image = NULL;
-Texture *scratch = NULL;
 Texture *shatter = NULL;
-Texture *photoPanel = NULL;
+Texture **photoPanel = NULL;
 const Uint8 *state;
 
 SDL_Event e;
 
 bool red=false,green=false,blue=false,alpha=false;
-bool scratches=false;
-bool whiteEffect=false;
-bool shattered=false;
 int redVal=255,greenVal=255,blueVal=255,alphaVal=255;
 
-void reset();
+int ages=4;
+int currentAge=0;
 
 bool init()
 {
@@ -95,150 +91,153 @@ bool init()
 
 bool loadMedia()
 {
-	image = new Photo(window);
-	if(!image->loadTexture("bear.jpg",renderer,PIXEL))
+	/*
+	string defaultButton[4] = {"Images\\Buttons\\defaultButton.jpg","Images\\Buttons\\blank-wood-plaque.gif","Images\\Buttons\\steelButton.jpg","Images\\Buttons\\rustButton.jpg"};
+	string changeButton[4] = {"Images\\Buttons\\defaultButton.jpg","Images\\Buttons\\woodChangeButton.gif","Images\\Buttons\\steelButton.jpg","Images\\Buttons\\rustButton.jpg"};
+	string panelImages[4] = {"Images\\Background\\defaultWall.jpg","Images\\Background\\wood.jpg","Images\\Background\\stoneWall.jpg","Images\\Background\\rustWall.jpg"};
+	*/
+	int ages=4;
+	string defaultButton[4] = {"Image\\Button\\defaultButton.jpg","Image\\Button\\woodButton.gif","Image\\Button\\steelButton.jpg","Image\\Button\\rustButton.jpg"};
+	string changeButton[4] = {"Image\\Button\\defaultButton.jpg","Image\\Button\\woodChange.gif","Image\\Button\\steelButton.jpg","Image\\Button\\rustButton.jpg"};
+	string panelImages[4] = {"Image\\Background\\defaultWall.jpg","Image\\Background\\wood.jpg","Image\\Background\\stoneWall.jpg","Image\\Background\\rustWall.jpg"};
+	string fonts[4] = {"Fonts\\Montserrat-Regular.ttf","Fonts\\CREAMPUF.ttf","Fonts\\uwch.ttf","Fonts\\FancyPantsNF.ttf"};
+
+	image = new Photo(window,renderer);
+	if(!image->loadTexture("bear.jpg",PIXEL,renderer))
+	{
+		return false;
+	}
+	if(!image->init(renderer))
 	{
 		return false;
 	}
 	image->setBlendMode(SDL_BLENDMODE_BLEND);
-	photoPanel = new Texture(window);
-	if(!photoPanel->loadTexture("wood.jpg",renderer,COLOR_KEY))
+	photoPanel = new Texture *[ages];
+	for(int i=0;i<ages;i++)
 	{
-		return false;
+		photoPanel[i]=new Texture(window);
+		if(!photoPanel[i]->loadTexture(panelImages[i],COLOR_KEY,renderer))
+		{
+			return false;
+		}
 	}
-	scratch = new Texture(window);
-	if(!scratch->loadTexture("scratch2.jpg",renderer,COLOR_KEY))
-	{
-		return false;
-	}
-	scratch->setBlendMode(SDL_BLENDMODE_BLEND);
-	white = new Texture(window);
-	if(!white->loadTexture("whiteBorder.jpg",renderer,COLOR_KEY))
-	{
-		return false;
-	}
-	white->setBlendMode(SDL_BLENDMODE_BLEND);
+
 	shatter = new Texture(window);
-	if(!shatter->loadTexture("shattered.jpg",renderer,COLOR_KEY))
+	if(!shatter->loadTexture("shattered.jpg",COLOR_KEY,renderer))
 	{
 		return false;
 	}
 	shatter->setBlendMode(SDL_BLENDMODE_BLEND);
 
-	TTF_Font *font=TTF_OpenFont("CREAMPUF.ttf",32);
-	if(font==NULL)
-	{
-		cout<<"Couldn't open font from file: "<<SDL_GetError()<<endl;
-		return false;
-	}
+
 	buttons = new Button*[buttonLimit];
 	for(int i=0;i<buttonLimit;i++)
 	{
 		buttons[i]=new Button();
 	}
-	if(!buttons[0]->init(40,60,120,40,"button.jpg","Preset 1","Preset 1",renderer,font,true,BASIC))
+	if(!buttons[0]->init(40,60,120,40,defaultButton,"1830'","Preset 1",renderer,fonts,true,BASIC,ages))
 	{
 		return false;
 	}
 
-	if(!buttons[1]->init(40,120,120,40,"button.jpg","Preset 2","Preset 2",renderer,font,true,BASIC))
+	if(!buttons[1]->init(40,120,120,40,defaultButton,"1880'","Preset 2",renderer,fonts,true,BASIC,ages))
 	{
 		return false;
 	}
 
-	if(!buttons[2]->init(40,180,120,40,"button.jpg","Preset 3","Preset 3",renderer,font,true,BASIC))
+	if(!buttons[2]->init(40,180,120,40,defaultButton,"1940'","Preset 3",renderer,fonts,true,BASIC,ages))
 	{
 		return false;
 	}
-	if(!buttons[3]->init(40,240,120,40,"button.jpg","Reset","Reset",renderer,font,true,BASIC))
+	if(!buttons[3]->init(40,240,120,40,defaultButton,"Reset","Reset",renderer,fonts,true,BASIC,ages))
 	{
 		return false;
 	}
-	if(!buttons[4]->init(40,300,120,40,"button.jpg","Koniec","Koniec",renderer,font,true,BASIC))
+	if(!buttons[4]->init(40,300,120,40,defaultButton,"Koniec","Koniec",renderer,fonts,true,BASIC,ages))
 	{
 		return false;
 	}
-	if(!buttons[5]->init(screenWidth-40-photoPanelWidth,0,40,40,"button.jpg","X","X",renderer,font,true,BASIC|ADVANCED))
+	if(!buttons[5]->init(screenWidth-40-photoPanelWidth,0,40,40,defaultButton,"X","X",renderer,fonts,true,BASIC|ADVANCED,ages))
 	{
 		return false;
 	}
-	if(!buttons[6]->init(0,0,200,40,"button.jpg","Ustawienia zaawansowane","Ustawienia zaawansowane",renderer,font,true,BASIC))
+	if(!buttons[6]->init(20,0,200,40,defaultButton,"Ustawienia zaawansowane","Ustawienia zaawansowane",renderer,fonts,true,BASIC,ages))
 	{
 		return false;
 	}
-	if(!buttons[7]->init(0,0,200,40,"button.jpg","Ustawienia podstawowe","Ustawienia podstawowe",renderer,font,false,ADVANCED))
+	if(!buttons[7]->init(20,0,200,40,defaultButton,"Ustawienia podstawowe","Ustawienia podstawowe",renderer,fonts,false,ADVANCED,ages))
 	{
 		return false;
 	}
-	if(!buttons[8]->init(40,60,120,40,"button.jpg","Kontrast","Kontrast",renderer,font,false,ADVANCED))
+	if(!buttons[8]->init(40,60,120,40,defaultButton,"Kontrast","Kontrast",renderer,fonts,false,ADVANCED,ages))
 	{
 		return false;
 	}
-	if(!buttons[9]->init(40,100,40,40,"button.jpg","-","Kontrast-",renderer,font,false,ADVANCED))
+	if(!buttons[9]->init(40,100,40,40,changeButton,"-","Kontrast-",renderer,fonts,false,ADVANCED,ages))
 	{
 		return false;
 	}
-	if(!buttons[10]->init(120,100,40,40,"button.jpg","+","Kontrast+",renderer,font,false,ADVANCED))
+	if(!buttons[10]->init(120,100,40,40,changeButton,"+","Kontrast+",renderer,fonts,false,ADVANCED,ages))
 	{
 		return false;
 	}
-	if(!buttons[11]->init(40,160,120,40,"button.jpg","Gamma","",renderer,font,false,ADVANCED))
+	if(!buttons[11]->init(40,160,120,40,defaultButton,"Gamma","",renderer,fonts,false,ADVANCED,ages))
 	{
 		return false;
 	}
-	if(!buttons[12]->init(40,200,40,40,"button.jpg","-","Gamma-",renderer,font,false,ADVANCED))
+	if(!buttons[12]->init(40,200,40,40,changeButton,"-","Gamma-",renderer,fonts,false,ADVANCED,ages))
 	{
 		return false;
 	}
-	if(!buttons[13]->init(120,200,40,40,"button.jpg","+","Gamma+",renderer,font,false,ADVANCED))
+	if(!buttons[13]->init(120,200,40,40,changeButton,"+","Gamma+",renderer,fonts,false,ADVANCED,ages))
 	{
 		return false;
 	}
-	if(!buttons[14]->init(40,260,120,40,"button.jpg","Saturacja","",renderer,font,false,ADVANCED))
+	if(!buttons[14]->init(40,260,120,40,defaultButton,"Saturacja","",renderer,fonts,false,ADVANCED,ages))
 	{
 		return false;
 	}
-	if(!buttons[15]->init(40,300,40,40,"button.jpg","-","Saturacja-",renderer,font,false,ADVANCED))
+	if(!buttons[15]->init(40,300,40,40,changeButton,"-","Saturacja-",renderer,fonts,false,ADVANCED,ages))
 	{
 		return false;
 	}
-	if(!buttons[16]->init(120,300,40,40,"button.jpg","+","Saturacja+",renderer,font,false,ADVANCED))
+	if(!buttons[16]->init(120,300,40,40,changeButton,"+","Saturacja+",renderer,fonts,false,ADVANCED,ages))
 	{
 		return false;
 	}
-	if(!buttons[17]->init(40,460,120,40,"button.jpg","Czarno-Biale","BW",renderer,font,false,ADVANCED))
+	if(!buttons[17]->init(40,460,120,40,defaultButton,"Czarno-Biale","BW",renderer,fonts,false,ADVANCED,ages))
 	{
 		return false;
 	}
-	if(!buttons[18]->init(40,520,120,40,"button.jpg","Sepia","Sepia",renderer,font,false,ADVANCED))
+	if(!buttons[18]->init(40,520,120,40,defaultButton,"Sepia","Sepia",renderer,fonts,false,ADVANCED,ages))
 	{
 		return false;
 	}
-	if(!buttons[19]->init(40,360,120,40,"button.jpg","Rozmycie","Rozmycie",renderer,font,false,ADVANCED))
+	if(!buttons[19]->init(40,360,120,40,defaultButton,"Rozmycie","Rozmycie",renderer,fonts,false,ADVANCED,ages))
 	{
 		return false;
 	}
-	if(!buttons[20]->init(90,110,20,20,"button.jpg","r","ResetKontrast",renderer,font,false,ADVANCED))
+	if(!buttons[20]->init(90,110,20,20,defaultButton,"r","ResetKontrast",renderer,fonts,false,ADVANCED,ages))
 	{
 		return false;
 	}
-	if(!buttons[21]->init(90,210,20,20,"button.jpg","r","ResetGamma",renderer,font,false,ADVANCED))
+	if(!buttons[21]->init(90,210,20,20,defaultButton,"r","ResetGamma",renderer,fonts,false,ADVANCED,ages))
 	{
 		return false;
 	}
-	if(!buttons[22]->init(90,310,20,20,"button.jpg","r","ResetSaturacja",renderer,font,false,ADVANCED))
+	if(!buttons[22]->init(90,310,20,20,defaultButton,"r","ResetSaturacja",renderer,fonts,false,ADVANCED,ages))
 	{
 		return false;
 	}
-	if(!buttons[23]->init(40,400,40,40,"button.jpg","-","Rozmycie-",renderer,font,false,ADVANCED))
+	if(!buttons[23]->init(40,400,40,40,changeButton,"-","Rozmycie-",renderer,fonts,false,ADVANCED,ages))
 	{
 		return false;
 	}
-	if(!buttons[24]->init(120,400,40,40,"button.jpg","+","Rozmycie+",renderer,font,false,ADVANCED))
+	if(!buttons[24]->init(120,400,40,40,changeButton,"+","Rozmycie+",renderer,fonts,false,ADVANCED,ages))
 	{
 		return false;
 	}
-	if(!buttons[25]->init(90,410,20,20,"button.jpg","r","ResetRozmycie",renderer,font,false,ADVANCED))
+	if(!buttons[25]->init(90,410,20,20,defaultButton,"r","ResetRozmycie",renderer,fonts,false,ADVANCED,ages))
 	{
 		return false;
 	}
@@ -248,9 +247,11 @@ void close()
 {
 	delete buttons;
 	image->free();
-	photoPanel->free();
-	scratch->free();
-	white->free();
+	for(int i=0;i<ages;i++)
+	{
+		photoPanel[i]->free();
+	}
+
 	SDL_DestroyTexture(texture);
 	texture = NULL;
 	SDL_DestroyRenderer(renderer);
@@ -294,19 +295,7 @@ void controls(SDL_Event &e)
 			cout<<"Sepia\n";
 			break;
 		case SDLK_n:
-			scratches=false;
-			whiteEffect=false;
-			red=false;
-			green=false;
-			blue=false;
-			alpha=false;
-			redVal=255;
-			greenVal=255;
-			blueVal=255;
-			alphaVal=255;
-			cout<<"Reset\n";
-			image->free();
-			image->loadTexture("bear.jpg",renderer,PIXEL);
+			image->reset(renderer);
 			break;
 			default:break;
 		case SDLK_d:
@@ -336,31 +325,6 @@ void controls(SDL_Event &e)
 		case SDLK_j:
 			image->lowSaturation();
 			break;
-		case SDLK_1:
-			image->makeBW();
-			image->filterImage(LOW);
-			image->lowContrast(10);
-			whiteEffect=true;
-			scratches=true;
-			break;
-		case SDLK_2:
-			image->makeSepia(40);
-			image->lowContrast(2);
-			image->filterImage(LOW);
-			image->filterImage(LOW);
-
-			scratches=true;
-		case SDLK_3:
-			image->filterImage(LOW);
-			image->lowSaturation();
-			image->lowSaturation();
-			image->lowSaturation();
-			image->lowSaturation();
-			image->lowContrast();
-			image->highBrightness();
-			image->highBrightness();
-			image->highBrightness();
-			image->highBrightness();
 		}
 	}
 
@@ -417,24 +381,9 @@ int main( int argc, char* args[] )
 						}
 					}
 				}
-				image->renderStreched(renderer);
-				photoPanel->renderPanel(renderer);
-				if(scratches)
-				{
-					scratch->setAlpha(50);
-					scratch->renderStreched(renderer);
-				}
-				if(whiteEffect)
-				{
-					white->setAlpha(120);
-					white->renderStreched(renderer);
-				}
-				/*shattered=true;
-				if(shatter)
-				{
-					shatter->setAlpha(120);
-					shatter->renderStreched(renderer);
-				}*/
+				image->render(renderer);
+				photoPanel[currentAge]->renderPanel(renderer);
+
 				for(int i=0;i<buttonLimit;i++)
 				{
 					if(buttons[i]->isVisible())
@@ -455,23 +404,31 @@ int main( int argc, char* args[] )
 							string button=buttons[i]->getFunction();
 							if(button=="Preset 1")
 							{
+								image->reset(renderer);
 								image->makeBW();
 								image->filterImage(LOW);
 								image->lowContrast(10);
-								whiteEffect=true;
-								scratches=true;
+								image->setBorder(true);
+								image->setScratches(true);
+								for(int i=0;i<buttonLimit;i++)buttons[i]->changeAge(1);
+								currentAge=1;
 							}
 
 							if(button=="Preset 2")
 							{
+								image->reset(renderer);
 								image->makeSepia(40);
 								image->lowContrast(2);
 								image->filterImage(LOW);
 								image->filterImage(LOW);
-								scratches=true;
+								image->setBorder(false);
+								image->setScratches(true);
+								for(int i=0;i<buttonLimit;i++)buttons[i]->changeAge(3);
+								currentAge=3;
 							}
 							if(button=="Preset 3")
 							{
+								image->reset(renderer);
 								image->filterImage(LOW);
 								image->lowSaturation();
 								image->lowSaturation();
@@ -482,10 +439,16 @@ int main( int argc, char* args[] )
 								image->highBrightness();
 								image->highBrightness();
 								image->highBrightness();
+								image->setBorder(false);
+								image->setScratches(false);
+								for(int i=0;i<buttonLimit;i++)buttons[i]->changeAge(2);
+								currentAge=2;
 							}
 							if(button=="Reset")
 							{
-								reset();
+								image->reset(renderer);
+								for(int i=0;i<buttonLimit;i++)buttons[i]->changeAge(0);
+								currentAge=0;
 							}
 							if(button=="Koniec")
 							{
@@ -544,12 +507,12 @@ int main( int argc, char* args[] )
 							}
 							if(button=="BW")
 							{
-								reset();
+								image->reset(renderer);
 								image->makeBW();
 							}
 							if(button=="Sepia")
 							{
-								reset();
+								image->reset(renderer);
 								image->makeSepia(40);
 							}
 							if(button=="Rozmycie")
@@ -568,25 +531,25 @@ int main( int argc, char* args[] )
 							}
 							if(button=="ResetRozmycie")
 							{
-								reset();
+								image->reset(renderer);
 								image->setFilterCounter(0);
 								image->restoreEffects();
 							}
 							if(button=="ResetSaturacja")
 							{
-								reset();
+								image->reset(renderer);
 								image->setSaturationCounter(0);
 								image->restoreEffects();
 							}
 							if(button=="ResetGamma")
 							{
-								reset();
+								image->reset(renderer);
 								image->setBrightnessCounter(0);
 								image->restoreEffects();
 							}
 							if(button=="ResetKontrast")
 							{
-								reset();
+								image->reset(renderer);
 								image->setContrastCounter(0);
 								image->restoreEffects();
 							}
@@ -599,21 +562,4 @@ int main( int argc, char* args[] )
 	}
 	close();
 	return 0;
-}
-
-void reset()
-{
-	scratches=false;
-	whiteEffect=false;
-	red=false;
-	green=false;
-	blue=false;
-	alpha=false;
-	redVal=255;
-	greenVal=255;
-	blueVal=255;
-	alphaVal=255;
-	cout<<"Reset\n";
-	image->free();
-	image->loadTexture("bear.jpg",renderer,PIXEL);
 }

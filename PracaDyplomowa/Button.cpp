@@ -5,8 +5,10 @@ Button::Button()
 	
 }
 
-bool Button::init(int x,int y,int width,int height ,string image,string text,string function,SDL_Renderer *renderer, TTF_Font *font, bool visible,int tab)
+bool Button::init(int x,int y,int width,int height ,string *image,string text,string function,SDL_Renderer *renderer, string *fonts, bool visible,int tab, int ages)
 {
+	this->currentAge=0;
+	this->ages=ages;
 	this->tab=tab;
 	this->function=function;
 	this->visible=visible;
@@ -19,24 +21,40 @@ bool Button::init(int x,int y,int width,int height ,string image,string text,str
 	this->height=height;
 	this->defWidth=width;
 	this->defHeight=height;
-	this->texture=NULL;
-	this->texture=new Texture();
-	if(!this->texture->loadTexture(image,renderer,COLOR_KEY))
+	this->texture=new Texture *[ages];
+	this->textTexture=new Texture *[ages];
+	for(int i=0;i<ages;i++)
 	{
-		return false;
+		texture[i]=new Texture();
+		if(!this->texture[i]->loadTexture(image[i],COLOR_KEY,renderer))
+		{
+			return false;
+		}
+		this->texture[i]->setAlpha(150);
+		int size = 72;
+		if(text.length()>10)
+		{
+			size=32;
+		}
+		TTF_Font *font=TTF_OpenFont(fonts[i].c_str(),size);
+		if(font==NULL)
+		{
+			cout<<"Couldn't open font from file: "<<SDL_GetError()<<endl;
+			return false;
+		}
+		if(!this->initTextTexture(font,renderer,i))
+		{
+			return false;
+		}
 	}
-	if(!this->initTextTexture(font,renderer))
-	{
-		return false;
-	}
-	this->texture->setAlpha(150);
+
 	return true;
 }
 
-bool Button::initTextTexture(TTF_Font *font, SDL_Renderer *renderer)
+bool Button::initTextTexture(TTF_Font *font, SDL_Renderer *renderer, int index)
 {
-	this->textTexture=new Texture();
-	if(!this->textTexture->loadTextTexture(font,text,renderer))
+	this->textTexture[index]=new Texture();
+	if(!this->textTexture[index]->loadTextTexture(font,text,renderer))
 	{
 		return false;
 	}
@@ -45,7 +63,10 @@ bool Button::initTextTexture(TTF_Font *font, SDL_Renderer *renderer)
 
 Button::~Button()
 {
-	this->texture->free();
+	for(int i=0;i<ages;i++)
+	{
+		this->texture[i]->free();
+	}
 }
 
 bool Button::getClicked()
@@ -70,8 +91,8 @@ void Button::render(SDL_Renderer *renderer)
 	clip.y=y;
 	clip.w=width;
 	clip.h=height;
-	texture->render(x,y,renderer,clip);
-	textTexture->render(x,y,renderer,clip);
+	texture[currentAge]->render(x,y,clip,renderer);
+	textTexture[currentAge]->render(x,y,clip,renderer);
 }
 
 void Button::collision(SDL_Event &e, const Uint8 *state)
@@ -167,4 +188,9 @@ void Button::tabChange(int tab)
 	{
 		visible=false;
 	}
+}
+
+void Button::changeAge(int age)
+{
+	this->currentAge=age;
 }

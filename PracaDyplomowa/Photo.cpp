@@ -1,13 +1,40 @@
 #include "Photo.h"
 
 
-Photo::Photo(SDL_Window *window)
+Photo::Photo(SDL_Window *window,SDL_Renderer *renderer)
 {
 	this->brightnessCounter=0;
 	this->contrastCounter=0;
 	this->filterCounter=0;
 	this->saturationCounter=0;
 	this->window=window;
+	this->scratched=false;
+	this->border=false;
+}
+
+Photo::~Photo()
+{
+	scratch->free();
+	white->free();
+}
+
+bool Photo::init(SDL_Renderer *renderer)
+{
+	scratch = new Texture(window);
+	if(!scratch->loadTexture("scratch2.jpg",COLOR_KEY,renderer))
+	{
+		return false;
+	}
+	scratch->setBlendMode(SDL_BLENDMODE_BLEND);
+	scratch->setAlpha(50);
+	white = new Texture(window);
+	if(!white->loadTexture("whiteBorder.jpg",COLOR_KEY,renderer))
+	{
+		return false;
+	}
+	white->setAlpha(120);
+	white->setBlendMode(SDL_BLENDMODE_BLEND);
+	return true;
 }
 
 void Photo::makeBW()
@@ -591,4 +618,35 @@ void Photo::restoreEffects()
 			this->lowContrast();
 		}
 	}
+}
+
+void Photo::render(SDL_Renderer *renderer)
+{
+	Texture::renderStreched(renderer);
+	if(scratched)
+	{
+		scratch->renderStreched(renderer);
+	}
+	if(border)
+	{
+		white->renderStreched(renderer);
+	}
+}
+
+void Photo::setScratches(bool scratched)
+{
+	this->scratched=scratched;
+}
+
+void Photo::setBorder(bool border)
+{
+	this->border=border;
+}
+
+void Photo::reset(SDL_Renderer *renderer)
+{
+	setBorder(false);
+	setScratches(false);
+	free();
+	loadTexture("bear.jpg",PIXEL,renderer);
 }

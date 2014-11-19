@@ -34,17 +34,17 @@ public:
 	Texture(SDL_Window *window);
 	Texture();
 	~Texture();
-	bool loadTexture(string file, SDL_Renderer *renderer, int mode);
-	bool loadTextTexture(TTF_Font *font,string text, SDL_Renderer *renderer);
+	bool loadTexture(string file,int mode,SDL_Renderer *renderer);
+	bool loadTextTexture(TTF_Font *font,string text,SDL_Renderer *renderer);
 
 	int getWidth();
 	int getHeight();
 
-	void render(int x, int y, SDL_Renderer *renderer);
-	void render(int x, int y, SDL_Renderer *renderer, double angle);
+	void render(int x, int y,SDL_Renderer *renderer);
+	void render(int x, int y, double angle,SDL_Renderer *renderer);
 	void renderStreched(SDL_Renderer *renderer);
 	void renderPanel(SDL_Renderer *renderer);
-	void render(int x, int y, SDL_Renderer *renderer,SDL_Rect &clip);
+	void render(int x, int y,SDL_Rect &clip,SDL_Renderer *renderer);
 
 	void free();
 

@@ -7,8 +7,10 @@
 class Button
 {
 private:
-	Texture *texture;
-	Texture *textTexture;
+	int ages;
+	int currentAge;
+	Texture **texture;
+	Texture **textTexture;
 	int x,y;
 	int defWidth,defHeight;
 	int width,height;
@@ -18,10 +20,11 @@ private:
 	bool clicked;
 	bool selected;
 	bool visible;
-	bool initTextTexture(TTF_Font *font,SDL_Renderer *renderer);
+	bool initTextTexture(TTF_Font *font,SDL_Renderer *renderer, int index);
 public:
 	Button();
 	~Button();
+	void changeAge(int age);
 	void render(SDL_Renderer *renderer);
 	void collision(SDL_Event &e, const Uint8 *state);
 	bool getClicked();
@@ -32,6 +35,6 @@ public:
 	string getText();
 	string getFunction();
 	void tabChange(int tab);
-	bool init(int x,int y,int width,int height ,string image,string text,string function,SDL_Renderer *renderer, TTF_Font *font, bool visible, int tab);
+	bool init(int x,int y,int width,int height ,string *image,string text,string function,SDL_Renderer *renderer, string *fonts, bool visible, int tab, int ages);
 };
 #endif

@@ -7,6 +7,11 @@
 class Photo : public Texture
 {
 private:
+	bool scratched;
+	bool border;
+	Texture *white;
+	Texture *scratch;
+
 	int saturationCounter;
 	int brightnessCounter;
 	int filterCounter;
@@ -19,10 +24,13 @@ private:
 
 	HSV RGBtoHSV(RGB rgb);
 	RGB HSVtoRGB(HSV hsv);
+
+
 public:
 	Photo();
-	Photo(SDL_Window *window);
+	Photo(SDL_Window *window,SDL_Renderer *renderer);
 	~Photo();
+	bool init(SDL_Renderer *renderer);
 	void makeBW();
 	void makeSepia(int colorSaturation);
 	void highContrast();
@@ -43,6 +51,12 @@ public:
 	void incCounter(int counter);
 	void decCounter(int counter);
 	void restoreEffects();
+
+	void setScratches(bool scratched);
+	void setBorder(bool border);
+
+	void render(SDL_Renderer *renderer);
+	void reset(SDL_Renderer *renderer);
 };
 
 #endif

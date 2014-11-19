@@ -29,13 +29,13 @@ Texture::~Texture()
 void Texture::free()
 {
 	if(texture!=NULL){
-	SDL_DestroyTexture(texture);
+	//SDL_DestroyTexture(texture);
 	texture=NULL;}
 	imageW=0;
 	imageH=0;
 }
 
-bool Texture::loadTexture(string file, SDL_Renderer *renderer,int mode)
+bool Texture::loadTexture(string file,int mode,SDL_Renderer *renderer)
 {
 	free();
 	//SDL_Texture* loadTexture(string path);
@@ -86,11 +86,15 @@ bool Texture::loadTexture(string file, SDL_Renderer *renderer,int mode)
 	return true;
 }
 
-bool Texture::loadTextTexture(TTF_Font *font,string text, SDL_Renderer *renderer)
+bool Texture::loadTextTexture(TTF_Font *font,string text,SDL_Renderer *renderer)
 {
 	free();
 	SDL_Color textColor = {0,0,0};
-	SDL_Surface* textSurface = TTF_RenderText_Solid(font,text.c_str(),textColor);
+	string newText=" ";
+	newText.append(text);
+	newText.append(" ");
+	
+	SDL_Surface* textSurface = TTF_RenderText_Solid(font,newText.c_str(),textColor);
 	if(textSurface==NULL)
 	{
 		cout<<"Failed to create text texture: "<<SDL_GetError()<<endl;
@@ -113,7 +117,7 @@ void Texture::render(int x,int y,SDL_Renderer *renderer)
 	SDL_RenderCopy(renderer,texture,NULL,&renderQuad);
 }
 
-void Texture::render(int x,int y,SDL_Renderer *renderer, double angle)
+void Texture::render(int x,int y,double angle,SDL_Renderer *renderer)
 {
 
 	if(frameNumber==0)
@@ -181,7 +185,7 @@ void Texture::modifyColor(int red,int green, int blue)
 	SDL_SetTextureColorMod(texture,red,green,blue);
 }
 
-void Texture::render(int x, int y, SDL_Renderer *renderer,SDL_Rect &clip)
+void Texture::render(int x, int y,SDL_Rect &clip,SDL_Renderer *renderer)
 {
 	SDL_Rect displayRect = {0,0,photoPanelWidth,screenHeight};
 	SDL_RenderCopyEx(renderer,texture,&displayRect,&clip,NULL,NULL,SDL_FLIP_NONE);
